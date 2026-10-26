@@ -73,9 +73,12 @@ export function StaffDashboard() {
   }, [])
 
   const navItems = [
-    { id: 'overview', label: 'التشغيل اليومي', en: 'Operations', icon: LayoutGrid },
+    { id: 'overview', label: 'الرئيسية', en: 'Operations', icon: LayoutGrid },
+    { id: 'devices', label: 'الأجهزة والجلسات', en: 'Devices & sessions', icon: Gamepad2 },
+    { id: 'products', label: 'الطلبات والمنتجات', en: 'Orders & products', icon: Zap },
+    { id: 'payments', label: 'الفواتير والمدفوعات', en: 'Invoices & payments', icon: WalletCards },
     { id: 'shift', label: 'شيفتي', en: 'My shift', icon: ClipboardCheck },
-    { id: 'messages', label: 'التسليم والاستلام', en: 'Handover', icon: MessageSquareText, count: 2 },
+    { id: 'messages', label: 'الرسائل', en: 'Messages & handover', icon: MessageSquareText, count: 2 },
     { id: 'history', label: 'سجل نشاطي', en: 'My history', icon: History },
   ]
 
@@ -117,6 +120,9 @@ export function StaffDashboard() {
           <div className="bottom-grid"><section className="panel activity-panel"><div className="panel-heading"><div><h2>آخر النشاطات</h2><p>أحدث العمليات في شيفتك</p></div><button className="text-button" onClick={() => setActiveNav('history')}>السجل الكامل <ChevronLeft size={15} /></button></div><div className="timeline">{timeline.map((event) => <div className="timeline-item" key={event.time}><span className={`timeline-dot ${event.tone}`} /><time>{event.time}</time><div><strong>{event.title}</strong><p>{event.detail}</p></div></div>)}</div></section><section className="panel handover-panel"><div className="panel-heading"><div><h2>تسليم سريع</h2><p>اترك ملاحظة للموظف التالي</p></div><MessageSquareText size={19} className="panel-icon" /></div><div className="message-preview"><div className="avatar small">س</div><div><strong>سلمان الحربي <span>من الشيفت السابق</span></strong><p>تمت مراجعة الصندوق حتى 09:00. كل شيء مطابق.</p><time>منذ ساعة</time></div></div><button className="handover-action" onClick={() => setActiveNav('messages')}>فتح مركز التسليم <ChevronLeft size={16} /></button></section></div>
         </>}
 
+        {activeNav === 'devices' && <DevicesView onBack={() => setActiveNav('overview')} onSelect={(device) => setSelectedDevice(device)} />}
+        {activeNav === 'products' && <ProductsView />}
+        {activeNav === 'payments' && <PaymentsView />}
         {activeNav === 'shift' && <ShiftView onBack={() => setActiveNav('overview')} />}
         {activeNav === 'messages' && <MessagesView message={message} setMessage={setMessage} sentMessages={sentMessages} sendMessage={sendMessage} />}
         {activeNav === 'history' && <HistoryView />}
@@ -126,6 +132,20 @@ export function StaffDashboard() {
     </main>
   )
 }
+
+function DevicesView({ onBack, onSelect }: { onBack: () => void; onSelect: (device: Device) => void }) {
+  return <div className="inner-page"><button className="back-link" onClick={onBack}><ChevronLeft size={16} /> العودة للرئيسية</button><div className="page-heading compact"><div><p className="eyebrow">التشغيل اليومي · الأجهزة المصرّح بها</p><h1>الأجهزة والجلسات</h1><p className="subheading">اختر جهازاً متاحاً لبدء جلسة وفق التسعيرة المعتمدة.</p></div><span className="secure-label"><ShieldCheck size={15} /> صلاحيات الموظف</span></div><div className="device-groups">{Object.entries(devices.reduce<Record<string, Device[]>>((a, d) => { a[d.room] = [...(a[d.room] || []), d]; return a }, {})).map(([room, items]) => <section className="room-section" key={room}><div className="room-title"><div><h3>{room}</h3><span>{items.length} أجهزة · <b>{items.filter((d) => d.status === 'available').length} متاحة</b></span></div></div><div className="device-grid">{items.map((device) => <button className={`device-card ${device.status}`} key={device.id} disabled={device.status !== 'available'} onClick={() => onSelect(device)}><div className="device-card-top"><span className="device-id">{device.id}</span><span className={`status-label ${device.status}`}><i />{statusLabel(device.status)}</span></div><div className="device-icon"><Gamepad2 size={23} /></div><h4>{device.name}</h4><p>{device.type}</p>{device.status === 'available' ? <span className="start-hint">بدء جلسة فردية أو متعددة <Zap size={14} /></span> : <span className="maintenance-note">{device.status === 'playing' ? 'جلسة قيد التشغيل' : 'غير متاح مؤقتاً'}</span>}</button>)}</div></section>)}</div></div>
+}
+
+function ProductsView() {
+  return <div className="inner-page"><div className="page-heading compact"><div><p className="eyebrow">الطلبات والمنتجات · الأسعار من الكتالوج</p><h1>الطلبات والمنتجات</h1><p className="subheading">أضف المنتجات إلى جلسة نشطة فقط. لا يمكن تعديل الأسعار من حساب الموظف.</p></div><span className="secure-label"><ShieldCheck size={15} /> مخزون محمي</span></div><div className="history-toolbar"><div className="search-field"><Search size={17} /><input placeholder="ابحث عن مشروب أو وجبة..." aria-label="بحث المنتجات" /></div><button className="filter-button">كل الفئات <ChevronLeft size={15} /></button></div><section className="panel product-quick-grid">{['Pepsi','Water','Popcorn','Chips'].map((item) => <button className="product-tile" key={item}><span className="product-icon"><Zap size={18} /></span><strong>{item}</strong><small>السعر من النظام · اختر الجلسة أولاً</small></button>)}</section><div className="notice-bar"><div className="notice-icon"><ShieldCheck size={17} /></div><div><strong>سياق الجلسة مطلوب</strong><p>تتم إضافة الطلبات من بطاقة الغرفة النشطة لضمان تسجيلها على الفاتورة الصحيحة.</p></div></div></div>
+}
+
+function PaymentsView() {
+  return <div className="inner-page"><div className="page-heading compact"><div><p className="eyebrow">الفواتير والمدفوعات · شيفتي الحالية</p><h1>الفواتير والمدفوعات</h1><p className="subheading">اعرض فقط الفواتير التي تحتاجها أثناء شيفتك وسجّل المدفوعات المصرّح بها.</p></div><span className="secure-label"><ShieldCheck size={15} /> عرض محدود</span></div><section className="panel history-table"><div className="table-row table-head"><span>الفاتورة</span><span>الغرفة</span><span>الإجمالي</span><span>المتبقي</span><span>الحالة</span></div>{[['INV-2041','PS5-04','—','—','قيد التشغيل'],['INV-2038','PS5-07','—','—','بانتظار الدفع']].map((row) => <div className="table-row" key={row[0]}>{row.map((cell, i) => <span key={i} className={i === 4 ? 'table-status' : ''}>{cell}</span>)} </div>)}</section><div className="warning-box"><ShieldCheck size={17} /><span><strong>الأسعار والخصومات محكومة بالنظام</strong><small>لا تظهر تقارير مالية عامة أو بيانات شيفتات موظفين آخرين في مساحة العمل هذه.</small></span></div></div>
+}
+
+function statusLabel(status: Device['status']) { return status === 'available' ? 'متاح' : status === 'playing' ? 'قيد التشغيل' : 'صيانة' }
 
 function ShiftView({ onBack }: { onBack: () => void }) { return <div className="inner-page"><button className="back-link" onClick={onBack}><ChevronLeft size={16} /> العودة للتشغيل</button><div className="page-heading compact"><div><p className="eyebrow">شيفتي · الثلاثاء 24 سبتمبر</p><h1>الوردية الصباحية</h1><p className="subheading">09:00 — 17:00 · فرع النخيل · نقطة البيع الرئيسية</p></div><span className="shift-status"><i /> جارية الآن</span></div><div className="shift-stats"><div><Clock3 size={18} /><span>الوقت المنقضي</span><strong>01:46:22</strong></div><div><WalletCards size={18} /><span>إجمالي المقبوضات</span><strong>1,248.00 <small>ر.س</small></strong></div><div><CheckCircle2 size={18} /><span>حالة الصندوق</span><strong className="green-text">مطابق حتى الآن</strong></div></div><div className="shift-layout"><section className="panel checklist"><div className="panel-heading"><div><h2>قائمة إغلاق الشيفت</h2><p>أكمل الخطوات قبل طلب التسليم</p></div><span className="progress-count">2 / 4</span></div>{['مطابقة رصيد الصندوق مع العمليات', 'مراجعة الجلسات المفتوحة', 'تسليم المفاتيح والأجهزة', 'إرسال ملخص الشيفت للموظف التالي'].map((item, i) => <label className={`check-row ${i < 2 ? 'done' : ''}`} key={item}><input type="checkbox" defaultChecked={i < 2} /><span className="check-box"><Check size={14} /></span><span><strong>{item}</strong><small>{i === 0 ? 'آخر مطابقة منذ 12 دقيقة' : i === 1 ? 'لا توجد جلسات متأخرة' : 'بانتظار التنفيذ'}</small></span></label>)}<div className="warning-box"><ShieldCheck size={17} /><span><strong>لا يوجد اعتماد تلقائي</strong><small>في حال وجود فرق في الصندوق، سيبقى الإغلاق معلقاً لحين المراجعة حسب سياسة الاعتماد.</small></span></div><button className="primary-button wide">طلب إغلاق وتسليم الشيفت <ChevronLeft size={16} /></button></section><section className="panel"><div className="panel-heading"><div><h2>خط زمني للشيفت</h2><p>كل الأحداث المسجلة</p></div></div><div className="timeline detailed">{timeline.concat([{ time: '09:04', title: 'فتح نقطة البيع', detail: 'POS-01 · بداية الشيفت', tone: 'blue' }]).map((event) => <div className="timeline-item" key={event.time + event.title}><span className={`timeline-dot ${event.tone}`} /><time>{event.time}</time><div><strong>{event.title}</strong><p>{event.detail}</p></div></div>)}</div></section></div></div> }
 
