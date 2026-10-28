@@ -11,6 +11,12 @@ import {
   Clock3,
   Gamepad2,
   History,
+  CupSoda,
+  Popcorn,
+  Cookie,
+  Utensils,
+  Play,
+  Plus,
   LayoutGrid,
   LogOut,
   Menu,
@@ -128,7 +134,7 @@ export function StaffDashboard() {
         {activeNav === 'history' && <HistoryView />}
       </section>
 
-      {selectedDevice && <div className="modal-backdrop" onClick={() => setSelectedDevice(null)}><div className="session-modal" onClick={(e) => e.stopPropagation()}><div className="modal-header"><div><span className="eyebrow">بدء جلسة جديدة</span><h2>{selectedDevice.name}</h2><p>{selectedDevice.room} · {selectedDevice.type}</p></div><button className="icon-button" onClick={() => setSelectedDevice(null)} aria-label="إغلاق"><X size={18} /></button></div><div className="mode-select"><label>نوع الجلسة</label><div className="mode-buttons"><button className={mode === 'single' ? 'selected' : ''} onClick={() => setMode('single')}><Gamepad2 size={18} /><strong>فردية</strong><span>Single player</span></button><button className={mode === 'multi' ? 'selected' : ''} onClick={() => setMode('multi')}><Users size={18} /><strong>متعددة</strong><span>Multiplayer</span></button></div></div><div className="form-grid"><label>معرّف العميل<input placeholder="مثال: C-10482" /></label><label>المدة<input placeholder="اختر من التسعيرة المعتمدة" /></label></div><div className="modal-note"><ShieldCheck size={16} /> السعر والمدة يحددهما إعداد التسعيرة المعتمد — لا يمكن تعديلهما من حساب الموظف.</div><button className="primary-button" onClick={() => setSelectedDevice(null)}>متابعة بدء الجلسة <ChevronLeft size={16} /></button></div></div>}
+      {selectedDevice && <div className="modal-backdrop" onClick={() => setSelectedDevice(null)}><div className="session-modal" onClick={(e) => e.stopPropagation()}><div className="modal-header"><div><span className="eyebrow session-step">الخطوة 1 من 2 · إعداد الجلسة</span><h2>بدء جلسة جديدة</h2><p><strong>{selectedDevice.name}</strong> · {selectedDevice.room}</p></div><button className="icon-button" onClick={() => setSelectedDevice(null)} aria-label="إغلاق"><X size={18} /></button></div><div className="mode-select"><label>نوع الجلسة</label><div className="mode-buttons"><button className={mode === 'single' ? 'selected' : ''} onClick={() => setMode('single')}><Gamepad2 size={18} /><strong>فردية</strong><span>Single player</span></button><button className={mode === 'multi' ? 'selected' : ''} onClick={() => setMode('multi')}><Users size={18} /><strong>متعددة</strong><span>Multiplayer</span></button></div></div><div className="form-grid"><label>معرّف العميل<input placeholder="مثال: C-10482" /></label><label>المدة<input placeholder="اختر من التسعيرة المعتمدة" /></label></div><div className="modal-note"><ShieldCheck size={16} /> السعر والمدة يحددهما إعداد التسعيرة المعتمد — لا يمكن تعديلهما من حساب الموظف.</div><button className="primary-button" onClick={() => setSelectedDevice(null)}>متابعة بدء الجلسة <ChevronLeft size={16} /></button></div></div>}
     </main>
   )
 }
@@ -138,7 +144,14 @@ function DevicesView({ onBack, onSelect }: { onBack: () => void; onSelect: (devi
 }
 
 function ProductsView() {
-  return <div className="inner-page"><div className="page-heading compact"><div><p className="eyebrow">الطلبات والمنتجات · الأسعار من الكتالوج</p><h1>الطلبات والمنتجات</h1><p className="subheading">أضف المنتجات إلى جلسة نشطة فقط. لا يمكن تعديل الأسعار من حساب الموظف.</p></div><span className="secure-label"><ShieldCheck size={15} /> مخزون محمي</span></div><div className="history-toolbar"><div className="search-field"><Search size={17} /><input placeholder="ابحث عن مشروب أو وجبة..." aria-label="بحث المنتجات" /></div><button className="filter-button">كل الفئات <ChevronLeft size={15} /></button></div><section className="panel product-quick-grid">{['Pepsi','Water','Popcorn','Chips'].map((item) => <button className="product-tile" key={item}><span className="product-icon"><Zap size={18} /></span><strong>{item}</strong><small>السعر من النظام · اختر الجلسة أولاً</small></button>)}</section><div className="notice-bar"><div className="notice-icon"><ShieldCheck size={17} /></div><div><strong>سياق الجلسة مطلوب</strong><p>تتم إضافة الطلبات من بطاقة الغرفة النشطة لضمان تسجيلها على الفاتورة الصحيحة.</p></div></div></div>
+  const products = [
+    { name: 'بيبسي', en: 'Pepsi', icon: CupSoda, tone: 'cola' },
+    { name: 'مياه', en: 'Water', icon: CupSoda, tone: 'water' },
+    { name: 'فشار', en: 'Popcorn', icon: Popcorn, tone: 'popcorn' },
+    { name: 'شيبس', en: 'Chips', icon: Cookie, tone: 'chips' },
+    { name: 'وجبة خفيفة', en: 'Snack', icon: Utensils, tone: 'snack' },
+  ]
+  return <div className="inner-page"><div className="page-heading compact"><div><p className="eyebrow">الطلبات والمنتجات · الأسعار من الكتالوج</p><h1>الطلبات والمنتجات</h1><p className="subheading">اختر منتجاً لإضافته إلى جلسة نشطة. الأسعار والكميات تأتي من النظام.</p></div><span className="secure-label"><ShieldCheck size={15} /> مخزون محمي</span></div><div className="history-toolbar"><div className="search-field"><Search size={17} /><input placeholder="ابحث عن مشروب أو وجبة..." aria-label="بحث المنتجات" /></div><button className="filter-button">كل الفئات <ChevronLeft size={15} /></button><button className="secondary-button add-product-button"><Plus size={16} /> إضافة منتج</button></div><section className="product-catalog" aria-label="كتالوج المنتجات">{products.map(({ name, en, icon: Icon, tone }) => <button className={`product-card ${tone}`} key={en}><span className="product-art"><Icon size={30} strokeWidth={1.8} /></span><span className="product-card-copy"><strong>{name}</strong><small>{en}</small><em>السعر من النظام</em></span><span className="product-add"><Plus size={17} /></span></button>)}</section><div className="notice-bar"><div className="notice-icon"><ShieldCheck size={17} /></div><div><strong>سياق الجلسة مطلوب</strong><p>تتم إضافة الطلبات من بطاقة الغرفة النشطة لضمان تسجيلها على الفاتورة الصحيحة.</p></div></div></div>
 }
 
 function PaymentsView() {
